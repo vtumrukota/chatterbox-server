@@ -11,8 +11,9 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
+//closure scoped results for persistent storage
+var results = [];
 
-  var results = [];
 exports.requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
@@ -55,7 +56,6 @@ exports.requestHandler = function(request, response) {
   // node to actually send all the data over to the client.
   if(request.method === "GET"){
     if(request.url === '/classes/messages' || request.url ==='/classes/room1'){
-      console.log(results);
       response.end(JSON.stringify({"results":results}));
     } else {
       statusCode = 404;
@@ -69,27 +69,19 @@ exports.requestHandler = function(request, response) {
       statusCode = 201;
       response.writeHead(statusCode, headers);
 
+      //data comes in streams for live servers, this takes them in and puts them back together
       var data = "";
       request.on('data', function(chunk){
         data += chunk;
       });
       request.on("end", function(){
-        console.log(data);
         var jsonData = JSON.parse(data);
-        // console.log(jsonData);
         results.push(jsonData);
-        console.log(results);
         response.end(JSON.stringify(results));
       })
-      // results.push(request._postData);
-
-
-      // response.end(JSON.stringify({"results":results}));
-      // console.log(request);
-      // console.log(results)
+      // don't put code outside of the end, asynchronous execution
 
     } else {
-      // 404 here too
       statusCode = 404;
       response.writeHead(statusCode, headers);
       response.end();
