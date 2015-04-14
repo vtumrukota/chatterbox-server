@@ -12,6 +12,7 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 
+  var results = [];
 exports.requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
@@ -52,12 +53,50 @@ exports.requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  var results = [];
-  if(request.method === "POST"){
-    results.push(request);
+  if(request.method === "GET"){
+    if(request.url === '/classes/messages' || request.url ==='/classes/room1'){
+      console.log(results);
+      response.end(JSON.stringify({"results":results}));
+    } else {
+      statusCode = 404;
+      response.writeHead(statusCode, headers);
+      response.end();
+    }
+  } else if (request.method === "POST") {
+    if(request.url === '/classes/messages' || request.url === '/classes/room1'){
+      // console.log(request._postData);
+      // console.log(JSON.stringify(request));
+      statusCode = 201;
+      response.writeHead(statusCode, headers);
+
+      var data = "";
+      request.on('data', function(chunk){
+        data += chunk;
+      });
+      request.on("end", function(){
+        console.log(data);
+        var jsonData = JSON.parse(data);
+        // console.log(jsonData);
+        results.push(jsonData);
+        console.log(results);
+        response.end(JSON.stringify(results));
+      })
+      // results.push(request._postData);
+
+
+      // response.end(JSON.stringify({"results":results}));
+      // console.log(request);
+      // console.log(results)
+
+    } else {
+      // 404 here too
+      statusCode = 404;
+      response.writeHead(statusCode, headers);
+      response.end();
+    }
   }
 
-  response.end(JSON.stringify({"results":results}));
+  // response.end(JSON.stringify({"results":results}));
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
