@@ -56,7 +56,6 @@ exports.requestHandler = function(request, response) {
   // node to actually send all the data over to the client.
   if(request.method === "GET"){
     if(request.url === '/classes/messages' || request.url ==='/classes/room1'){
-      console.log(results);
       response.end(JSON.stringify({"results":results}));
     } else {
       statusCode = 404;
